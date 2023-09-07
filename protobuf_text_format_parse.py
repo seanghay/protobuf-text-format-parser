@@ -1,5 +1,6 @@
-from pyparsing import pyparsing_common as ppc
 import pyparsing as pp
+
+ppc = pp.pyparsing_common
 
 LBRACE = pp.Suppress("{")
 RBRACE = pp.Suppress("}")
@@ -18,11 +19,11 @@ PROTO_ROOT_OBJECT = pp.Forward().setName("ProtoRootObject")
 
 PROTO_VALUE << (STRING | NUMBER)
 PROTO_PAIR << (identifier + COLON + PROTO_VALUE)
-PROTO_MEMBER << pp.Group(PROTO_PAIR | PROTO_OBJECT, aslist=True)
-PROTO_MEMBERS = pp.delimitedList(PROTO_MEMBER, delim=pp.empty)
-PROTO_OBJECT << (identifier + LBRACE + PROTO_MEMBERS + RBRACE) 
-PROTO_ROOT_OBJECT << (identifier + LBRACE + PROTO_MEMBERS + RBRACE) 
-PROTO = pp.delimitedList(PROTO_ROOT_OBJECT, delim=pp.empty)
+PROTO_MEMBER << pp.Group(PROTO_OBJECT | PROTO_PAIR)
+PROTO_MEMBERS = pp.delimitedList(pp.Dict(PROTO_MEMBER), delim=pp.empty)
+PROTO_OBJECT << (identifier + LBRACE + PROTO_MEMBERS + RBRACE)
+PROTO_ROOT_OBJECT << pp.Group(identifier + LBRACE + PROTO_MEMBERS + RBRACE)
+PROTO = pp.delimitedList(pp.Dict(PROTO_ROOT_OBJECT), delim=pp.empty)
 
 sample = """
 money { currency: "usd" amount { integer_part: "1" fractional_part: "20"} style: 1 }
